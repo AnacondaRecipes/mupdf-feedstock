@@ -1,71 +1,71 @@
 {% set name = "mupdf" %}
-{% set version = "1.17.0" %}
+{% set version = "1.27.0" %}
 
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  url: https://www.mupdf.com/downloads/archive/mupdf-{{ version }}-source.tar.xz
-  sha256: c935fb2593d9a28d9b56b59dad6e3b0716a6790f8a257a68fa7dcb4430bc6086
-  patches:
-    # Make shared libs, rather than static
-    # https://bugs.ghostscript.com/show_bug.cgi?id=702250
-    - Makefile-shared-libs-linux.patch  # [linux]
-    - Makefile-shared-libs-osx.patch  # [osx]
-    # don't install fully rendered docs
-    - Makefile.patch  # [unix]
-    # OSX has libfreetype.a, not libfreetype2.a
-    - Makerules.patch  # [osx]
+  - url: https://www.mupdf.com/downloads/archive/{{ name }}-{{ version }}-source.tar.gz
+    sha256: ae2442416de499182d37a526c6fa2bacc7a3bed5a888d113ca04844484dfe7c6
+    patches:
+      # OSX has libfreetype.a, not libfreetype2.a
+      - patches/Makerules.patch           # [osx]
+      - patches/MakefileOSX.patch         # [osx]
+      - patches/OSXSharedCreation.patch   # [osx]
 
 build:
-  number: 2
+  number: 0
   skip: true  # [win]
-  missing_dso_whitelist:   # [osx]
-    - /System/Library/Frameworks/GLUT.framework/Versions/A/GLUT  # [osx]
 
 requirements:
   build:
+    - {{ stdlib('c') }}
     - {{ compiler('c') }}
-    - {{ cdt('mesa-libgl-devel') }}  # [linux]
-    - {{ cdt('mesa-dri-drivers') }}  # [linux]
-    - {{ cdt('libselinux') }}  # [linux]
-    - {{ cdt('libxdamage') }}  # [linux]
-    - {{ cdt('libxxf86vm') }}  # [linux]
-    - {{ cdt('libxext') }}     # [linux]
-    - cmake  # [win]
-    - ninja  # [win]
-    - make
+    - {{ compiler('cxx') }}
+    - msys2-sed        # [win]
+    - msys2-make       # [win]
+    - msys2-coreutils  # [win]
+    - cmake            # [win]
+    - ninja-base       # [win]
+    - make             # [unix]
+    - python
     - pkg-config
+    # pyclang needed for library generation through Python scripts
+    - python-clang
+    - swig
   host:
-    - xorg-libxfixes  # [linux]
-    - libglu  # [linux]
-    - mesalib  # [unix]
-    - freetype
+    - python-clang
+    - mujs
+    - libgumbo
     - jbig2dec
-    - openjpeg
-    - zlib
-    - curl
-    - harfbuzz
-    - freeglut  # [linux or win]
+    - brotli {{ brotli }}
+    - xorg-libxfixes  # [unix]
+    - libglu {{ libglu }}  # [linux]
+    - mesalib {{ mesalib }}  # [linux]
+    - freetype {{ freetype }}
+    - libjpeg-turbo {{ libjpeg_turbo }}
+    - libopenjpeg {{ libopenjpeg }}
+    - zlib {{ zlib }}
+    - libcurl {{ libcurl }}
+    - harfbuzz {{ harfbuzz }}
+    - freeglut {{ freeglut }}  # [linux or win]
   run:
-    - xorg-libxext  # [linux]
-    - xorg-libx11  # [linux]
-    - jpeg
-    - openjpeg
-    - libcurl  # [linux]
+    - mujs
+    - openssl
+    - libgumbo
+    - xorg-libxext  # [unix]
+    - xorg-libx11  # [unix]
     - curl
-    - openssl  # [linux]
-    - harfbuzz
-    - freeglut  # [linux or win]
 
 test:
   commands:
     - test -f $PREFIX/bin/mutool  # [unix]
+    - test -f $PREFIX/lib/libmupdf${SHLIB_EXT}  # [unix]
     - if not exist %LIBRARY_BIN%\\mutool.exe exit 1  # [win]
 
 about:
-  home: https://www.mupdf.com/
+  home: https://www.mupdf.com
   license: AGPL-3.0-only
   license_family: GPL
   license_file: COPYING
@@ -76,8 +76,10 @@ about:
     a pixel for the highest fidelity in reproducing the look of a printed page
     on screen.
   doc_url: https://www.mupdf.com/docs
-  dev_url: http://git.ghostscript.com/?p=mupdf.git;a=summary
+  dev_url: https://github.com/ArtifexSoftware/mupdf
 
 extra:
   recipe-maintainers:
+    - xmnlab
     - scopatz
+    - jan-janssen
