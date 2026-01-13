@@ -1,45 +1,31 @@
-@echo off
-setlocal EnableDelayedExpansion
+@echo on
 
-copy "%RECIPE_DIR%\\CMakeLists.txt" .
+set PKG_CONFIG_PATH="%LIBRARY_LIB%\pkgconfig"
+set PYTHONPATH="%PREFIX%\Lib\site-packages"
+set BUILD_DIR=build-release-x64
+
+copy %RECIPE_DIR%\CMakeLists.txt .
 if errorlevel 1 exit 1
 
-:: Make a build folder and change to it.
-mkdir build
-cd build
+make generate
+if errorlevel 1 exit 1
 
-set VERBOSE=1
-:: Configure using the CMakeFiles
-::cmake -G "NMake Makefiles" ^
-::cmake -G "Visual Studio 14 2015 Win64" ^
-cmake -G Ninja ^
+@REM Configure using the CMakeFiles
+cmake -B %BUILD_DIR% -G Ninja -S %SRC_DIR% ^
       -DCMAKE_INSTALL_PREFIX:PATH="%LIBRARY_PREFIX%" ^
       -DCMAKE_PREFIX_PATH:PATH="%LIBRARY_PREFIX%" ^
-      -DCMAKE_BUILD_TYPE:STRING=Release ^
-      ..
+      -DCMAKE_BUILD_TYPE:STRING=Release
 if errorlevel 1 exit 1
 
-:: Build!
-::nmake
-cmake --build . --config Release
+@REM Build!
+cmake --build %BUILD_DIR% --config Release
 if errorlevel 1 exit 1
 
-:: Install!
-nmake install
+@REM Produce C++ bindings, as it is done via python script rather then build system
+%CONDA_PYTHON_EXE% scripts\mupdfwrap.py -d %BUILD_DIR% -b all -o windows
 if errorlevel 1 exit 1
 
-:: build system uses non-standard env vars
-::set XCFLAGS=%CFLAGS% -I"%LIBRARY_PREFIX%\\include"
-::set XLIBS=%LIBS%
-::set USE_SYSTEM_LIBS=yes
-::set USE_SYSTEM_JPEGXR=yes
+@REM Install!
+cmake --install %BUILD_DIR% --config Release
+if errorlevel 1 exit 1
 
-:: diagnostics
-::dir %LIBRARY_PREFIX%\\include
-
-:: build and install
-::make "prefix=%LIBRARY_PREFIX%" -j %CPU_COUNT% all
-::if errorlevel 1 exit 1
-:: no make check
-::make "prefix=%LIBRARY_PREFIX%" install
-::if errorlevel 1 exit 1

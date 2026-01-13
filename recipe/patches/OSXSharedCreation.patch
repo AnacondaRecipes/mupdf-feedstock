@@ -1,0 +1,120 @@
+iiziu at K73FQ2KLJ6 in ~/D/mupdf-1.27.0
+↪ cat 0001-fix-dylib-creation.patch                                                                                                                                                                                         (perseverance-scripts)
+From 2cd8b52ec1940c5c1f38af1e8662263efa85a5a2 Mon Sep 17 00:00:00 2001
+From: Ivan Iziumov <iiziumov@anaconda.com>
+Date: Mon, 12 Jan 2026 15:12:10 +0100
+Subject: [PATCH] fix dylib creation
+
+---
+ scripts/wrap/__main__.py | 26 +++++++++++++-------------
+ 1 file changed, 13 insertions(+), 13 deletions(-)
+
+diff --git a/scripts/wrap/__main__.py b/scripts/wrap/__main__.py
+index ff95a1a..5bc1a55 100644
+--- a/scripts/wrap/__main__.py
++++ b/scripts/wrap/__main__.py
+@@ -654,7 +654,7 @@ Usage:
+                     Compile and link source files created by action=0.
+
+                     Generates:
+-                        <dir-so>/libmupdfcpp.so
++                        <dir-so>/libmupdfcpp.dylib
+
+                     This gives a C++ interface onto mupdf.
+
+@@ -1626,7 +1626,7 @@ def build( build_dirs, swig_command, args, vs_upgrade, make_command):
+                         )
+
+             elif action == '1':
+-                # Compile and link generated C++ code to create libmupdfcpp.so.
++                # Compile and link generated C++ code to create libmupdfcpp.dylib.
+                 if state.state_.windows:
+                     # We build mupdfcpp.dll using the .sln; it will
+                     # contain all C functions internally - there is
+@@ -1656,13 +1656,13 @@ def build( build_dirs, swig_command, args, vs_upgrade, make_command):
+                                 )
+
+                 else:
+-                    jlib.log( 'Compiling generated C++ source code to create libmupdfcpp.so ...')
++                    jlib.log( 'Compiling generated C++ source code to create libmupdfcpp.dylib ...')
+                     include1 = f'{build_dirs.dir_mupdf}/include'
+                     include2 = f'{build_dirs.dir_mupdf}/platform/c++/include'
+                     cpp_files_text = ''
+                     for i in cpp_files:
+                         cpp_files_text += ' ' + os.path.relpath(i)
+-                    libmupdfcpp = f'{build_dirs.dir_so}/libmupdfcpp.so{so_version}'
++                    libmupdfcpp = f'{build_dirs.dir_so}/libmupdfcpp.dylib{so_version}'
+                     libmupdf = f'{build_dirs.dir_so}/libmupdf.so{so_version}'
+                     if pyodide:
+                         # Compile/link separately. Otherwise
+@@ -1737,7 +1737,7 @@ def build( build_dirs, swig_command, args, vs_upgrade, make_command):
+                         if command_was_run:
+                             macos_patch( libmupdfcpp, f'{build_dirs.dir_so}/libmupdf.dylib{so_version}')
+                         if so_version and state.state_.linux:
+-                            jlib.system(f'ln -sf libmupdfcpp.so{so_version} {build_dirs.dir_so}/libmupdfcpp.so')
++                            jlib.system(f'ln -sf libmupdfcpp.dylib{so_version} {build_dirs.dir_so}/libmupdfcpp.dylib')
+
+                     elif 'fpic' in dir_so_flags:
+                         # We build a .so containing the C and C++ API. This
+@@ -1785,8 +1785,8 @@ def build( build_dirs, swig_command, args, vs_upgrade, make_command):
+                                     verbose=True,
+                                     )
+
+-                        # Create libmupdfcpp.so from all .cpp and .c files.
+-                        libmupdfcpp_so = f'{build_dirs.dir_so}/libmupdfcpp.so'
++                        # Create libmupdfcpp.dylib from all .cpp and .c files.
++                        libmupdfcpp_so = f'{build_dirs.dir_so}/libmupdfcpp.dylib'
+                         alibs = [
+                                 f'{build_dirs.dir_so}/libmupdf.a',
+                                 f'{build_dirs.dir_so}/libmupdf-third.a'
+@@ -2017,10 +2017,10 @@ def build( build_dirs, swig_command, args, vs_upgrade, make_command):
+                     # generate mupdf.py and _mupdf.so in the --dir-so
+                     # directory?
+                     #
+-                    # [While libmupdfcpp.so requires matching
++                    # [While libmupdfcpp.dylib requires matching
+                     # debug/release build of libmupdf.so, it looks
+                     # like _mupdf.so does not require a matching
+-                    # libmupdfcpp.so and libmupdf.so.]
++                    # libmupdfcpp.dylib and libmupdf.so.]
+                     #
+                     flags_compile = ''
+                     flags_link = ''
+@@ -2065,7 +2065,7 @@ def build( build_dirs, swig_command, args, vs_upgrade, make_command):
+                     if 'shared' in dir_so_flags:
+                         libmupdf        = f'{build_dirs.dir_so}/libmupdf.so{so_version}'
+                         libmupdfthird   = f''
+-                        libmupdfcpp     = f'{build_dirs.dir_so}/libmupdfcpp.so{so_version}'
++                        libmupdfcpp     = f'{build_dirs.dir_so}/libmupdfcpp.dylib{so_version}'
+                     elif 'fpic' in dir_so_flags:
+                         libmupdf        = f'{build_dirs.dir_so}/libmupdf.a'
+                         libmupdfthird   = f'{build_dirs.dir_so}/libmupdf-third.a'
+@@ -2150,7 +2150,7 @@ def build( build_dirs, swig_command, args, vs_upgrade, make_command):
+                     # module) using the same underlying C library.
+                     #
+                     sos = []
+-                    sos.append( f'{build_dirs.dir_so}/libmupdfcpp.so{so_version}')
++                    sos.append( f'{build_dirs.dir_so}/libmupdfcpp.dylib{so_version}')
+                     if os.path.basename( build_dirs.dir_so).startswith( 'shared-'):
+                         sos.append( f'{build_dirs.dir_so}/libmupdf.so{so_version}')
+
+@@ -2214,7 +2214,7 @@ def build( build_dirs, swig_command, args, vs_upgrade, make_command):
+                     if command_was_run:
+                         macos_patch( out_so,
+                                 f'{build_dirs.dir_so}/libmupdf.dylib{so_version}',
+-                                f'{build_dirs.dir_so}/libmupdfcpp.so{so_version}',
++                                f'{build_dirs.dir_so}/libmupdfcpp.dylib{so_version}',
+                                 )
+             else:
+                 raise Exception( 'unrecognised --build action %r' % action)
+@@ -2781,7 +2781,7 @@ def main2():
+                     if 'shared' in dir_so_flags:
+                         libmupdf        = f'{build_dirs.dir_so}/libmupdf.so'
+                         libmupdfthird   = f''
+-                        libmupdfcpp     = f'{build_dirs.dir_so}/libmupdfcpp.so'
++                        libmupdfcpp     = f'{build_dirs.dir_so}/libmupdfcpp.dylib'
+                     elif 'fpic' in dir_so_flags:
+                         libmupdf        = f'{build_dirs.dir_so}/libmupdf.a'
+                         libmupdfthird   = f'{build_dirs.dir_so}/libmupdf-third.a'
+--
+2.51.0
