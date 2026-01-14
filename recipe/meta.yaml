@@ -15,7 +15,7 @@ source:
       - patches/OSXSharedCreation.patch   # [osx]
 
 build:
-  number: 0
+  number: 1
   skip: true  # [win]
 
 requirements:
@@ -49,6 +49,7 @@ requirements:
     - zlib {{ zlib }}
     - libcurl {{ libcurl }}
     - harfbuzz {{ harfbuzz }}
+    - openssl {{ openssl }}
     - freeglut {{ freeglut }}  # [linux or win]
   run:
     - mujs
