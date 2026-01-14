@@ -15,7 +15,7 @@ source:
       - patches/OSXSharedCreation.patch   # [osx]
 
 build:
-  number: 1
+  number: 2
   skip: true  # [win]
 
 requirements:
@@ -35,6 +35,7 @@ requirements:
     - python-clang
     - swig
   host:
+    - python
     - python-clang
     - mujs
     - libgumbo
@@ -52,6 +53,7 @@ requirements:
     - openssl {{ openssl }}
     - freeglut {{ freeglut }}  # [linux or win]
   run:
+    - python
     - mujs
     - openssl
     - libgumbo
