@@ -1,6 +1,6 @@
 --- a/scripts/wrap/__main__.py
 +++ b/scripts/wrap/__main__.py
-@@ -1648,20 +1648,36 @@
+@@ -1648,20 +1648,37 @@
                      # no mupdf.dll.
                      #
                      win32_infix = _windows_vs_upgrade( vs_upgrade, build_dirs, devenv)
@@ -31,17 +31,18 @@
 +                            command2 = f'{command} /Project {project}'
 +                            jlib.system(command2, verbose=1, out='log')
 +                    else:
-+                        # PBP/CI VS BuildTools ships MSBuild but not devenv.com.
++                        # PBP/CI VS BuildTools has MSBuild but not devenv.com.
++                        # Build .vcxproj files directly — /t:ProjectName on a .sln
++                        # is not a valid MSBuild target (MSB4057).
 +                        assert windows_vs and windows_vs.msbuild, 'No devenv.com or MSBuild.exe found'
 +                        jlib.log(f'Building mupdfcpp.dll by running msbuild ({windows_vs.msbuild}) ...')
 +                        for project in projects:
 +                            command2 = (
 +                                    f'cd {build_dirs.dir_mupdf}&&'
 +                                    f'"{windows_vs.msbuild}"'
-+                                    f' platform/{win32_infix}/mupdf.sln'
++                                    f' platform/{win32_infix}/{project}.vcxproj'
 +                                    f' /p:Configuration={windows_build_type2}'
 +                                    f' /p:Platform={build_dirs.cpu.windows_config}'
-+                                    f' /t:{project}'
 +                                    f' /verbosity:minimal'
 +                                    )
 +                            jlib.system(command2, verbose=1, out='log')
