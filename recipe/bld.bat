@@ -1,31 +1,57 @@
 @echo on
+setlocal EnableDelayedExpansion
 
-set PKG_CONFIG_PATH="%LIBRARY_LIB%\pkgconfig"
-set PYTHONPATH="%PREFIX%\Lib\site-packages"
-set BUILD_DIR=build-release-x64
+set "SLN_PLAT=%CMAKE_GENERATOR_PLATFORM%"
+set "SLN_DIR=platform\win32"
+set "SLN_FILE=mupdf.sln"
+set "CONFIG=Release"
 
-copy %RECIPE_DIR%\CMakeLists.txt .
+:: Work around Python 3.8+ DLL search restrictions for libclang.
+:: conda libclang installs a versioned DLL (libclang-*.dll) in %LIBRARY_BIN%;
+:: clang.cindex expects "libclang.dll", and Python 3.8+ won't search PATH for it.
+for %%f in ("%LIBRARY_BIN%\libclang-*.dll") do (
+    copy "%%f" "%LIBRARY_BIN%\libclang.dll"
+)
+set "PTH_FILE=%PREFIX%\Lib\site-packages\_conda_dll_search.pth"
+> "%PTH_FILE%" echo import os; os.add_dll_directory(os.environ['LIBRARY_BIN']) if hasattr(os, 'add_dll_directory') and os.environ.get('LIBRARY_BIN') and os.path.isdir(os.environ['LIBRARY_BIN']) else None
+
+:: Build Python bindings via pip. setup.py runs scripts/mupdfwrap.py
+:: (generate C++, build mupdfcpp64.dll via devenv, SWIG, build _mupdf.pyd).
+set MUPDF_SETUP_USE_CLANG_PYTHON=1
+set MUPDF_SETUP_USE_SWIG=1
+%PYTHON% -m pip install . --no-deps --no-build-isolation -vv
 if errorlevel 1 exit 1
 
-make generate
+:: Clean up build-time artifacts so they don't get packaged.
+del "%PTH_FILE%" 2>nul
+del "%LIBRARY_BIN%\libclang.dll" 2>nul
+
+:: Build mutool via MSBuild; reuses libmupdf.lib already built above.
+msbuild %SLN_DIR%\%SLN_FILE% ^
+    /p:Configuration=%CONFIG% ^
+    /p:Platform=%SLN_PLAT% ^
+    /t:mutool ^
+    /verbosity:normal
 if errorlevel 1 exit 1
 
-@REM Configure using the CMakeFiles
-cmake -B %BUILD_DIR% -G Ninja -S %SRC_DIR% ^
-      -DCMAKE_INSTALL_PREFIX:PATH="%LIBRARY_PREFIX%" ^
-      -DCMAKE_PREFIX_PATH:PATH="%LIBRARY_PREFIX%" ^
-      -DCMAKE_BUILD_TYPE:STRING=Release
+:: Install mutool, headers, and libraries
+cmake -E make_directory %LIBRARY_BIN%
+if errorlevel 1 exit 1
+cmake -E copy %SRC_DIR%\%SLN_DIR%\%SLN_PLAT%\%CONFIG%\mutool.exe %LIBRARY_BIN%\
 if errorlevel 1 exit 1
 
-@REM Build!
-cmake --build %BUILD_DIR% --config Release
+cmake -E make_directory %LIBRARY_INC%
+if errorlevel 1 exit 1
+cmake -E copy_directory %SRC_DIR%\include %LIBRARY_INC%
+if errorlevel 1 exit 1
+cmake -E copy_directory %SRC_DIR%\platform\c++\include %LIBRARY_INC%
 if errorlevel 1 exit 1
 
-@REM Produce C++ bindings, as it is done via python script rather then build system
-%CONDA_PYTHON_EXE% scripts\mupdfwrap.py -d %BUILD_DIR% -b all -o windows
+cmake -E make_directory %LIBRARY_LIB%
 if errorlevel 1 exit 1
-
-@REM Install!
-cmake --install %BUILD_DIR% --config Release
-if errorlevel 1 exit 1
-
+for %%f in (%SRC_DIR%\%SLN_DIR%\%SLN_PLAT%\%CONFIG%\*.lib) do (
+    copy "%%f" "%LIBRARY_LIB%\"
+)
+for %%f in (%SRC_DIR%\%SLN_DIR%\%SLN_PLAT%\%CONFIG%\*.dll) do (
+    copy "%%f" "%LIBRARY_BIN%\"
+)
