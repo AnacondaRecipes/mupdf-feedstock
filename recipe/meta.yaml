@@ -18,6 +18,8 @@ source:
       # PBP VS BuildTools has MSBuild but not devenv.com
       - patches/wdev-buildtools-no-devenv.patch  # [win]
       - patches/wrap-msbuild-fallback.patch      # [win]
+      # bin2coff was Win32-only; MSBuild x64 needs Release|x64 (MSB8013)
+      - patches/bin2coff-release-x64.patch       # [win]
 
 build:
   number: 0
