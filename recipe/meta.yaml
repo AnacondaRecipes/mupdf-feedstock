@@ -15,6 +15,9 @@ source:
       - patches/MakefileOSX.patch         # [osx]
       # libmupdfcpp.dylib naming in Python wrap scripts
       - patches/OSXSharedCreation.patch   # [osx]
+      # PBP VS BuildTools has MSBuild but not devenv.com
+      - patches/wdev-buildtools-no-devenv.patch  # [win]
+      - patches/wrap-msbuild-fallback.patch      # [win]
 
 build:
   number: 0
@@ -29,13 +32,14 @@ requirements:
     - python
     - pkg-config
     # pyclang needed for library generation through Python scripts
-    - python-clang
+    # 22.x fails to find fz_pixmap.refs when wrapping 1.28 headers (cf: python-clang <22)
+    - python-clang <22
     - swig
   host:
     - python
     - pip              # [win]
     - setuptools       # [win]
-    - python-clang     # [win]
+    - python-clang <22  # [win]
     - mujs 1.3.8
     - libgumbo 1.0.0
     - jbig2dec 0.20

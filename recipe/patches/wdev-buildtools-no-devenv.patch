@@ -1,0 +1,16 @@
+--- a/scripts/wdev.py
++++ b/scripts/wdev.py
+@@ -78,10 +78,11 @@
+             directories.sort()
+             directory = directories[-1]
+ 
+-            # Find `devenv`.
++            # Find `devenv` (absent on VS BuildTools — CI often has MSBuild only).
+             #
+             devenv = f'{directory}\\Common7\\IDE\\devenv.com'
+-            assert os.path.isfile( devenv), f'Does not exist: {devenv}'
++            if not os.path.isfile(devenv):
++                devenv = None
+ 
+             # Extract `year` and `grade` from `directory`.
+             #

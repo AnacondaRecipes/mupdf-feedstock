@@ -63,13 +63,13 @@ index b690833..633b04d 100644
 +$(PKCS7_LIB) : $(PKCS7_OBJ)
 +
 +$(MUPDF_LIB) : $(MUPDF_OBJ) $(THIRD_LIB) $(THREAD_LIB)
-+	$(LINK_CMD) -shared -Wl,-install_name -Wl,libmupdf.$(SO) -undefined dynamic_lookup $(THIRD_LIBS)
++	$(LINK_CMD) -shared -Wl,-install_name -Wl,libmupdf.$(SO) -undefined dynamic_lookup $(THIRD_LIBS) $(LIBCRYPTO_LIBS)
 +$(THIRD_LIB) : $(THIRD_OBJ)
 +	$(LINK_CMD) -shared -Wl,-install_name -Wl,libmupdf-third.$(SO) -undefined dynamic_lookup
 +$(THREAD_LIB) : $(THREAD_OBJ)
 +	$(LINK_CMD) -shared -Wl,-install_name -Wl,libmupdf-threads.$(SO) -undefined dynamic_lookup -lpthread
 +$(PKCS7_LIB) : $(PKCS7_OBJ)
-+	$(LINK_CMD) -v -shared -Wl,-install_name -Wl,libmupdf-pkcs7.$(SO) -undefined dynamic_lookup
++	$(LINK_CMD) -v -shared -Wl,-install_name -Wl,libmupdf-pkcs7.$(SO) -undefined dynamic_lookup $(LIBCRYPTO_LIBS)
 +
 +LIBS_TO_INSTALL_IN_LIB := $(MUPDF_LIB) $(THIRD_LIB) $(THREAD_LIB) $(PKCS7_LIB)
 
