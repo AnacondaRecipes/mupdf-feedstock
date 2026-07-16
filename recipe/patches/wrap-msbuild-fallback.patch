@@ -1,0 +1,51 @@
+--- a/scripts/wrap/__main__.py
++++ b/scripts/wrap/__main__.py
+@@ -1648,20 +1648,37 @@
+                     # no mupdf.dll.
+                     #
+                     win32_infix = _windows_vs_upgrade( vs_upgrade, build_dirs, devenv)
+-                    jlib.log(f'Building mupdfcpp.dll by running devenv ...')
+-                    build = f'{windows_build_type2}|{build_dirs.cpu.windows_config}'
+-                    command = (
+-                            f'cd {build_dirs.dir_mupdf}&&'
+-                            f'"{devenv}"'
+-                            f' platform/{win32_infix}/mupdf.sln'
+-                            f' /Build "{build}"'
+-                            )
+                     projects = ['mupdfcpp', 'libmuthreads']
+                     if m_target:
+                         projects += m_target.split(',')
+-                    for project in projects:
+-                        command2 = f'{command} /Project {project}'
+-                        jlib.system(command2, verbose=1, out='log')
++                    if devenv:
++                        jlib.log(f'Building mupdfcpp.dll by running devenv ...')
++                        build = f'{windows_build_type2}|{build_dirs.cpu.windows_config}'
++                        command = (
++                                f'cd {build_dirs.dir_mupdf}&&'
++                                f'"{devenv}"'
++                                f' platform/{win32_infix}/mupdf.sln'
++                                f' /Build "{build}"'
++                                )
++                        for project in projects:
++                            command2 = f'{command} /Project {project}'
++                            jlib.system(command2, verbose=1, out='log')
++                    else:
++                        # PBP/CI VS BuildTools has MSBuild but not devenv.com.
++                        # Build .vcxproj files directly — /t:ProjectName on a .sln
++                        # is not a valid MSBuild target (MSB4057).
++                        assert windows_vs and windows_vs.msbuild, 'No devenv.com or MSBuild.exe found'
++                        jlib.log(f'Building mupdfcpp.dll by running msbuild ({windows_vs.msbuild}) ...')
++                        for project in projects:
++                            command2 = (
++                                    f'cd {build_dirs.dir_mupdf}&&'
++                                    f'"{windows_vs.msbuild}"'
++                                    f' platform/{win32_infix}/{project}.vcxproj'
++                                    f' /p:Configuration={windows_build_type2}'
++                                    f' /p:Platform={build_dirs.cpu.windows_config}'
++                                    f' /verbosity:minimal'
++                                    )
++                            jlib.system(command2, verbose=1, out='log')
+ 
+                     for suffix in ('.dll', '.pdb'):
+                         jlib.fs_copy(
