@@ -22,7 +22,7 @@ source:
       - patches/bin2coff-release-x64.patch       # [win]
 
 build:
-  number: 0
+  number: 1
 
 requirements:
   build:
@@ -48,7 +48,8 @@ requirements:
     - brotli {{ brotli }}
     - xorg-libxfixes 6.0.1  # [unix]
     - libglu {{ libglu }}  # [linux]
-    - mesalib {{ mesalib }}  # [linux]
+    # TODO: revert to {{ '{{ mesalib }}' }} once cbc.yaml pins mesalib to 26.1.6
+    - mesalib 26.1.6  # [linux]
     - freetype {{ freetype }}
     - libjpeg-turbo {{ libjpeg_turbo }}
     - libopenjpeg {{ libopenjpeg }}
