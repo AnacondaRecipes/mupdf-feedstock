@@ -15,6 +15,13 @@ for %%f in ("%LIBRARY_BIN%\libclang-*.dll") do (
 set "PTH_FILE=%PREFIX%\Lib\site-packages\_conda_dll_search.pth"
 > "%PTH_FILE%" echo import os; os.add_dll_directory(os.environ['LIBRARY_BIN']) if hasattr(os, 'add_dll_directory') and os.environ.get('LIBRARY_BIN') and os.path.isdir(os.environ['LIBRARY_BIN']) else None
 
+echo ============================================
+echo Diagnostic started
+echo ============================================
+:: --- diagnostic: surface the real import error instead of pip's masked one ---
+%PYTHON% -c "import sys; sys.path.insert(0, '.'); import setup"
+:: --- end diagnostic ---
+
 :: Build Python bindings via pip. setup.py runs scripts/mupdfwrap.py
 :: (generate C++, build mupdfcpp64.dll via devenv, SWIG, build _mupdf.pyd).
 set MUPDF_SETUP_USE_CLANG_PYTHON=1
