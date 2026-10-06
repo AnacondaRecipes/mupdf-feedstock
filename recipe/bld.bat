@@ -19,7 +19,7 @@ set "PTH_FILE=%PREFIX%\Lib\site-packages\_conda_dll_search.pth"
 echo ============================================
 echo Patching pipcl.wdev for VS Build Tools support
 echo ============================================
-%PYTHON% "%RECIPE_DIR%\patch_pipcl_wdev.py"
+%PYTHON% "%RECIPE_DIR%\patch_pipcl_wdev.py" 2>&1
 if errorlevel 1 exit 1
 :: --- END TEMPORARY ---
 
