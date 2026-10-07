@@ -28,7 +28,7 @@ if errorlevel 1 exit 1
 echo ============================================
 echo Calling prepare_metadata_for_build_wheel directly, in-process
 echo ============================================
-%PREFIX%\python.exe -c "import sys; sys.path.insert(0, '.'); import setup; print(setup.prepare_metadata_for_build_wheel('_metadata_out'))"
+%PREFIX%\python.exe -c "import sys; sys.path.insert(0, '.'); import setup; print(setup.prepare_metadata_for_build_wheel('_metadata_out'))" 2>&1
 echo Direct hook call exited with errorlevel %errorlevel%
 
 :: Build Python bindings via pip. setup.py runs scripts/mupdfwrap.py
