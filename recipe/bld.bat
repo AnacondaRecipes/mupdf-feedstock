@@ -25,6 +25,12 @@ echo ============================================
 if errorlevel 1 exit 1
 :: --- END TEMPORARY ---
 
+echo ============================================
+echo Calling prepare_metadata_for_build_wheel directly, in-process
+echo ============================================
+%PREFIX%\python.exe -c "import sys; sys.path.insert(0, '.'); import setup; print(setup.prepare_metadata_for_build_wheel('_metadata_out'))"
+echo Direct hook call exited with errorlevel %errorlevel%
+
 :: Build Python bindings via pip. setup.py runs scripts/mupdfwrap.py
 :: (generate C++, build mupdfcpp64.dll via devenv, SWIG, build _mupdf.pyd).
 set MUPDF_SETUP_USE_CLANG_PYTHON=1
