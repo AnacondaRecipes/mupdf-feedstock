@@ -6,6 +6,8 @@ set "SLN_DIR=platform\win32"
 set "SLN_FILE=mupdf.sln"
 set "CONFIG=Release"
 
+set PYTHONUNBUFFERED=1
+
 :: Work around Python 3.8+ DLL search restrictions for libclang.
 :: conda libclang installs a versioned DLL (libclang-*.dll) in %LIBRARY_BIN%;
 :: clang.cindex expects "libclang.dll", and Python 3.8+ won't search PATH for it.
