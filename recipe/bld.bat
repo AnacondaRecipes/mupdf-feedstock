@@ -6,8 +6,6 @@ set "SLN_DIR=platform\win32"
 set "SLN_FILE=mupdf.sln"
 set "CONFIG=Release"
 
-set PYTHONUNBUFFERED=1
-
 :: Work around Python 3.8+ DLL search restrictions for libclang.
 :: conda libclang installs a versioned DLL (libclang-*.dll) in %LIBRARY_BIN%;
 :: clang.cindex expects "libclang.dll", and Python 3.8+ won't search PATH for it.
@@ -17,25 +15,11 @@ for %%f in ("%LIBRARY_BIN%\libclang-*.dll") do (
 set "PTH_FILE=%PREFIX%\Lib\site-packages\_conda_dll_search.pth"
 > "%PTH_FILE%" echo import os; os.add_dll_directory(os.environ['LIBRARY_BIN']) if hasattr(os, 'add_dll_directory') and os.environ.get('LIBRARY_BIN') and os.path.isdir(os.environ['LIBRARY_BIN']) else None
 
-:: --- TEMPORARY
-echo ============================================
-echo Patching pipcl.wdev for VS Build Tools support
-echo ============================================
-:: %PYTHON% "%RECIPE_DIR%\patch_pipcl_wdev.py" 2>&1
-:: if errorlevel 1 exit 1
-:: --- END TEMPORARY ---
-
-echo ============================================
-echo Calling prepare_metadata_for_build_wheel directly, in-process
-echo ============================================
-:: %PREFIX%\python.exe -c "import sys; sys.path.insert(0, '.'); import setup; print(setup.prepare_metadata_for_build_wheel('_metadata_out'))" 2>&1
-echo Direct hook call exited with errorlevel %errorlevel%
-
 :: Build Python bindings via pip. setup.py runs scripts/mupdfwrap.py
 :: (generate C++, build mupdfcpp64.dll via devenv, SWIG, build _mupdf.pyd).
 set MUPDF_SETUP_USE_CLANG_PYTHON=1
 set MUPDF_SETUP_USE_SWIG=1
-%PYTHON% -m pip install . --no-deps --no-build-isolation -vv 2>&1
+%PYTHON% -m pip install . --no-deps --no-build-isolation -vv
 if errorlevel 1 exit 1
 
 :: Clean up build-time artifacts so they don't get packaged.
