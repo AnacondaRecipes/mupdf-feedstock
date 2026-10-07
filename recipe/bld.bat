@@ -21,14 +21,14 @@ set "PTH_FILE=%PREFIX%\Lib\site-packages\_conda_dll_search.pth"
 echo ============================================
 echo Patching pipcl.wdev for VS Build Tools support
 echo ============================================
-%PYTHON% "%RECIPE_DIR%\patch_pipcl_wdev.py" 2>&1
-if errorlevel 1 exit 1
+:: %PYTHON% "%RECIPE_DIR%\patch_pipcl_wdev.py" 2>&1
+:: if errorlevel 1 exit 1
 :: --- END TEMPORARY ---
 
 echo ============================================
 echo Calling prepare_metadata_for_build_wheel directly, in-process
 echo ============================================
-%PREFIX%\python.exe -c "import sys; sys.path.insert(0, '.'); import setup; print(setup.prepare_metadata_for_build_wheel('_metadata_out'))" 2>&1
+:: %PREFIX%\python.exe -c "import sys; sys.path.insert(0, '.'); import setup; print(setup.prepare_metadata_for_build_wheel('_metadata_out'))" 2>&1
 echo Direct hook call exited with errorlevel %errorlevel%
 
 :: Build Python bindings via pip. setup.py runs scripts/mupdfwrap.py
