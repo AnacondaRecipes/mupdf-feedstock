@@ -1,0 +1,25 @@
+From bb744e709cf8b70211ab9aef60d43ab64db6f6cf Mon Sep 17 00:00:00 2001
+From: Andrey Vetroumov <avetroumov@anaconda.com>
+Date: Wed, 30 Sep 2026 12:38:21 +0000
+Subject: [PATCH] fix py2 string api in swig template
+
+---
+ scripts/wrap/swig.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/scripts/wrap/swig.py b/scripts/wrap/swig.py
+index 1b3c6f14f..421372736 100644
+--- a/scripts/wrap/swig.py
++++ b/scripts/wrap/swig.py
+@@ -740,7 +740,7 @@ def build_swig(
+                 {
+                     message += "Traceback (from traceback.format_tb()):\\n";
+                     PyObject* traceback_dict = PyModule_GetDict(traceback);
+-                    PyObject* format_tb = PyDict_GetItem(traceback_dict, PyString_FromString("format_tb"));
++                    PyObject* format_tb = PyDict_GetItem(traceback_dict, PyUnicode_FromString("format_tb"));
+                     PyObject* ret = PyObject_CallFunctionObjArgs(format_tb, trace, NULL);
+                     PyObject* iter = PyObject_GetIter(ret);
+                     for(;;)
+-- 
+2.43.0
+
