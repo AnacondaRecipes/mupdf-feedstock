@@ -37,6 +37,7 @@ build:
     - libglu
     - mesalib
 
+# we should build a package flitz and unvendor it from here https://github.com/ArtifexSoftware/mupdf/tree/1.28.2/include/mupdf/fitz
 requirements:
   build:
     - {{ stdlib('c') }}
