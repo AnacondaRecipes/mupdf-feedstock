@@ -26,16 +26,6 @@ source:
 
 build:
   number: 0
-  # Error: in requirements/run but it is not used (i.e. it is overdepending or perhaps statically linked?
-  # host dependency auto-inject into run: because of their own run_exports,
-  # but this build doesn't actually link them — suppress
-  ignore_run_exports:
-    - libcurl
-    - libbrotlicommon
-    - freeglut
-    - xorg-libxfixes
-    - libglu
-    - mesalib
 
 # we should build a package flitz and unvendor it from here https://github.com/ArtifexSoftware/mupdf/tree/1.28.2/include/mupdf/fitz
 requirements:
